@@ -20,8 +20,8 @@
 %--------------------------------------------------------------------------
 clear;
 addpath('constitutive','functions','plotting','setup');        
-[lstps,g,mpData,mesh] = setupGrid;                                          % setup information
-NRitMax = 10; tol = 1e-9;                                                   % Newton Raphson parameters
+[lstps,g,mpData,mesh] = setupGrid_collapse;                                          % setup information
+NRitMax = 100; tol = 1e-9;                                                   % Newton Raphson parameters
 [nodes,nD] = size(mesh.coord);                                              % number of nodes and dimensions
 [nels,nen] = size(mesh.etpl);                                               % number of elements and nodes/element
 nDoF = nodes*nD;                                                            % total number of degrees of freedom
@@ -29,6 +29,7 @@ nmp  = length(mpData);                                                      % nu
 lstp = 0;                                                                   % zero loadstep counter (for plotting function)
 uvw  = zeros(nDoF,1);                                                       % zeros displacements (for plotting function)
 run postPro;                                                                % plotting initial state & mesh
+tic
 for lstp=1:lstps                                                            % loadstep loop
   fprintf(1,'\n%s %4i %s %4i\n','loadstep ',lstp,' of ',lstps);             % text output to screen (loadstep)
   [mesh,mpData] = elemMPinfo(mesh,mpData);                                  % material point - element information
@@ -54,3 +55,4 @@ for lstp=1:lstps                                                            % lo
   mpData = updateMPs(uvw,mpData);                                           % update material points
   run postPro;                                                              % Plotting and post processing 
 end
+toc

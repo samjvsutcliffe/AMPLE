@@ -55,8 +55,8 @@ E=1e6;   v=0.3;   fc=20e3;                                                  % Yo
 mCst=[E v fc];                                                              % material constants
 g=10;                                                                       % gravity
 rho=1000;                                                                   % material density
-lstps=40;                                                                   % number of loadsteps
-a = 2;                                                                      % element multiplier
+lstps=1;                                                                   % number of loadsteps
+a = 4;                                                                      % element multiplier
 nelsx=4*a;                                                                  % number of elements in the x direction
 nelsy=4*a;                                                                  % number of elements in the y direction
 ly=8;  lx=8;                                                                % domain dimensions
