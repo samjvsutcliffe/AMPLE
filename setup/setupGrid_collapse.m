@@ -53,20 +53,20 @@ function [lstps,g,mpData,mesh] = setupGrid_collapse
 %% Analysis parameters
 E=1e6;   v=0.3;   fc=20e3;                                                  % Young's modulus, Poisson's ratio, yield strength   
 mCst=[E v fc];                                                              % material constants
-g=10;                                                                       % gravity
+g=20;                                                                       % gravity
 rho=1000;                                                                   % material density
-lstps=1;                                                                   % number of loadsteps
-a = 4;                                                                      % element multiplier
+lstps=50;                                                                   % number of loadsteps
+a = 2;                                                                      % element multiplier
 nelsx=4*a;                                                                  % number of elements in the x direction
 nelsy=4*a;                                                                  % number of elements in the y direction
 ly=8;  lx=8;                                                                % domain dimensions
-mp=6;                                                                       % number of material points in each direction per element
+mp=3;                                                                       % number of material points in each direction per element
 mpType = 2;                                                                 % material point type: 1 = MPM, 2 = GIMP
 cmType = 2;                                                                 % constitutive model: 1 = elastic, 2 = vM plasticity
 
 %% Mesh generation
-[etpl,coord] = formCoord2D(2*nelsx,nelsy,2*lx,ly);                          % background mesh generation
-[~,nen]      = size(etpl);                                                  % number of element nodes
+[etpl,coord,ftpl,fntpl] = formCoord2D(2*nelsx,nelsy,2*lx,ly);                          % background mesh generation
+[nels,nen]      = size(etpl);                                                  % number of element nodes
 [nodes,nD]   = size(coord);                                                 % number of nodes and dimensions
 h            = [lx ly]./[nelsx nelsy];                                      % element lengths in each direction
 
@@ -82,11 +82,24 @@ for node=1:nodes                                                            % lo
 end
 bc = bc(bc(:,1)>0,:);                                                       % remove empty part of bc
 
+eMin = zeros(nels,nD);                                                      % element lower coordinate limit
+eMax = zeros(nels,nD);                                                      % element upper coordainte limit 
+for i = 1:nD
+  ci = coord(:,i);                                                        % nodal coordinates in current i direction
+  c  = ci(etpl);                                                          % reshaped element coordinates in current i direction
+  eMin(:,i) = min(c,[],2);                                                % element lower coordinate limit 
+  eMax(:,i) = max(c,[],2);                                                % element upper coordainte limit 
+end
+
 %% Mesh data structure generation
 mesh.etpl  = etpl;                                                          % element topology
 mesh.coord = coord;                                                         % nodal coordinates
+mesh.ftpl  = ftpl;                                                          % face-element interactions
+mesh.fntpl = fntpl;                                                         % face topology (node numbers)
 mesh.bc    = bc;                                                            % boundary conditions
 mesh.h     = h;                                                             % mesh size
+mesh.eMin  = eMin;                                                          % element lower coordinate limit 
+mesh.eMax  = eMax;                                                          % element upper coordainte limit 
 
 %% Material point generation
 ngp    = mp^nD;                                                             % number of material points per element
@@ -112,6 +125,8 @@ vp      = 2^nD*lp(:,1).*lp(:,2);                                            % vo
 for mp = nmp:-1:1                                                           % loop backwards over MPs so array doesn't change size
   mpData(mp).mpType = mpType;                                               % material point type: 1 = MPM, 2 = GIMP
   mpData(mp).cmType = cmType;                                               % constitutive model: 1 = elastic, 2 = vM plasticity
+  mpData(mp).E    = E; 
+  mpData(mp).nu    = v; 
   mpData(mp).mpC    = mpC(mp,:);                                            % material point coordinates
   mpData(mp).vp     = vp(mp);                                               % material point volume
   mpData(mp).vp0    = vp(mp);                                               % material point initial volume

@@ -1,4 +1,4 @@
-function [fint,Kt,mpData] = detMPs(uvw,mpData)
+function [fint,mpData] = detMPs(uvw,mpData)
 
 %Stiffness and internal force calculation for all material points
 %--------------------------------------------------------------------------
@@ -108,36 +108,37 @@ for mp=1:nmp                                                                % ma
     %----------------------------------------------------------------------
     
     sig = Ksig/det(F);                                                      % Cauchy stress
-    A   = formULstiff(F,D,sig,BeT);                                         % spatial tangent stiffness matrix
-                                                            
-    iF   = dF\eye(3);                                                       % inverse deformation gradient increment
-    dXdx = [iF(1) 0     0     iF(2) 0     0     0     0     iF(3) ;         % start of loadstep to current configuration
-            0     iF(5) 0     0     iF(4) iF(6) 0     0     0     ;         % derivative mapping matrix
-            0     0     iF(9) 0     0     0     iF(8) iF(7) 0     ;
-            iF(4) 0     0     iF(5) 0     0     0     0     iF(6) ;
-            0     iF(2) 0     0     iF(1) iF(3) 0     0     0     ;
-            0     iF(8) 0     0     iF(7) iF(9) 0     0     0     ;
-            0     0     iF(6) 0     0     0     iF(5) iF(4) 0     ;
-            0     0     iF(3) 0     0     0     iF(2) iF(1) 0     ;
-            iF(7) 0     0     iF(8) 0     0     0     0     iF(9)];
-    G  = dXdx(aPos,aPos)*G;                                                 % derivatives of basis functions (current) 
-    
-    kp = mpData(mp).vp*det(dF)*(G.'*A(aPos,aPos)*G);                        % material point stiffness contribution
+    %A   = formULstiff(F,D,sig,BeT);                                         % spatial tangent stiffness matrix
+    %                                                        
+    %iF   = dF\eye(3);                                                       % inverse deformation gradient increment
+    %dXdx = [iF(1) 0     0     iF(2) 0     0     0     0     iF(3) ;         % start of loadstep to current configuration
+    %        0     iF(5) 0     0     iF(4) iF(6) 0     0     0     ;         % derivative mapping matrix
+    %        0     0     iF(9) 0     0     0     iF(8) iF(7) 0     ;
+    %        iF(4) 0     0     iF(5) 0     0     0     0     iF(6) ;
+    %        0     iF(2) 0     0     iF(1) iF(3) 0     0     0     ;
+    %        0     iF(8) 0     0     iF(7) iF(9) 0     0     0     ;
+    %        0     0     iF(6) 0     0     0     iF(5) iF(4) 0     ;
+    %        0     0     iF(3) 0     0     0     iF(2) iF(1) 0     ;
+    %        iF(7) 0     0     iF(8) 0     0     0     0     iF(9)];
+    %G  = dXdx(aPos,aPos)*G;                                                 % derivatives of basis functions (current) 
+    %
+    %kp = mpData(mp).vp*det(dF)*(G.'*A(aPos,aPos)*G);                        % material point stiffness contribution
     fp = mpData(mp).vp*det(dF)*(G.'*sig(sPos));                             % internal force contribution
     
     mpData(mp).F    = F;                                                    % store deformation gradient
     mpData(mp).sig  = sig;                                                  % store Cauchy stress
     mpData(mp).epsE = epsE;                                                 % store elastic logarithmic strain
     
-    npDoF=(size(ed,1)*size(ed,2))^2;                                        % no. entries in kp
-    nnDoF=size(ed,1)*size(ed,2);                                            % no. DoF in kp                        
-    krow(npCnt+1:npCnt+npDoF)=repmat(ed.',nnDoF,1);                         % row position storage
-    kcol(npCnt+1:npCnt+npDoF)=repmat(ed  ,nnDoF,1);                         % column position storage
-    kval(npCnt+1:npCnt+npDoF)=kp;                                           % stiffness storage
-    npCnt=npCnt+npDoF;                                                      % number of entries in Kt
+    %npDoF=(size(ed,1)*size(ed,2))^2;                                        % no. entries in kp
+    %nnDoF=size(ed,1)*size(ed,2);                                            % no. DoF in kp                        
+    %krow(npCnt+1:npCnt+npDoF)=repmat(ed.',nnDoF,1);                         % row position storage
+    %kcol(npCnt+1:npCnt+npDoF)=repmat(ed  ,nnDoF,1);                         % column position storage
+    %kval(npCnt+1:npCnt+npDoF)=kp;                                           % stiffness storage
+    %npCnt=npCnt+npDoF;                                                      % number of entries in Kt
     fint(ed)=fint(ed)+fp;                                                   % internal force contribution
 end
 
 nDoF=length(uvw);                                                           % number of degrees of freedom
-Kt=sparse(krow,kcol,kval,nDoF,nDoF);                                        % form the global stiffness matrix
+%Kt=sparse(krow,kcol,kval,nDoF,nDoF);                                        % form the global stiffness matrix
+
 end
