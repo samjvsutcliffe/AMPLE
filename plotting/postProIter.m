@@ -1,0 +1,25 @@
+%Post processing script for the AMPLE code
+%--------------------------------------------------------------------------
+% Author: William Coombs
+% Date:   29/01/2019
+% Description:
+% The script produces VTK output files based on the background mesh and
+% material point data.  
+% Background mesh is plotted for all loadsteps.  
+%
+%--------------------------------------------------------------------------
+% POSTPRO
+%--------------------------------------------------------------------------
+% See also:
+% MAKEVTK           - VTK file for background mesh
+% MAKEVTKMP         - VTK file for MP data
+%--------------------------------------------------------------------------
+
+sig = reshape([mpData.sig],6,nmp)';                                         % all material point stresses (nmp,6)
+mpC = reshape([mpData.mpC],nD,nmp)';                                        % all material point coordinates (nmp,nD)
+mpU = [mpData.u]';                                                          % all material point displacements
+mpDataName = sprintf('output/mpData_%i_%i.vtk',lstp,NRit);                          % MP output data file name
+makeVtkMP(mpC,sig,mpU,mpDataName);                                          % generate material point VTK file
+
+meshName = sprintf('output/mesh_%i_%i.vtk',lstp,NRit);                              % MP output data file name
+makeVtkIter(mesh.coord,mesh.etpl,uvw,oobf_nodal,meshName);                                 % generate mesh VTK file
