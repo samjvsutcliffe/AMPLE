@@ -66,7 +66,7 @@ else                                                                        % 3D
     sPos=[1 2 3 4 4 5 5 6 6];
 end
 
-parfor mp=1:nmp                                                                % material point loop
+for mp=1:nmp                                                                % material point loop
     
     nIN = mpData(mp).nIN;                                                   % nodes associated with the material point 
     dNx = mpData(mp).dSvp;                                                  % basis function derivatives (start of lstp)

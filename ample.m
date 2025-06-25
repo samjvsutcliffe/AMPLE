@@ -114,7 +114,7 @@ for lstp=1:lstps                                                            % lo
     fErr = norm(oobf)/norm(fext+frct+eps);                                  % normalised oobf error
     NRit = NRit+1;                                                          % increment the NR counter
     fprintf(1,'%s %2i %s %8.3e\n','  iteration ',NRit,' NR error ',fErr);   % text output to screen (NR error)
-  end                           
+  end
   mpData = updateMPs(uvw,mpData,mesh);                                           % update material points
   too_long_crit = split_critera(mesh,mpData,1);
   if(any(too_long_crit))
@@ -123,7 +123,7 @@ for lstp=1:lstps                                                            % lo
   end
   drawnow;
   run postPro;                                                              % Plotting and post processing 
-end    
+end
 %catch e %e is an MException struct
 %fprintf(1,'The identifier was:\n%s',e.identifier);
 %fprintf(1,'There was an error! The message was:\n%s',e.message);

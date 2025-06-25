@@ -65,6 +65,13 @@ nelsy  = 2^5 * height_scale;                                                    
 ly_mps     = 16;
 ly     = ly_mps*height_scale; 
 lx = ly/nelsy;                                                % domain dimensions
+
+nelsx = 1;
+nelsy= 4;
+lx = 1;
+ly = 2;
+ly_mps = 1;
+
 %nelsx_mp  = 2;
 %lx_mps = round(nelsx_mp*ly/nelsy);
 lx_mps = lx;% domain dimensions
@@ -73,8 +80,8 @@ mpType = 2;                                                                 % ma
 cmType = 1;                                                                 % constitutive model: 1 = elastic, 2 = vM plasticity
 
 %% Mesh generation
-[etpl,coord] = formCoord2D(nelsx,nelsy,lx,ly);                              % background mesh generation
-[~,nen]      = size(etpl);                                                  % number of element nodes
+[etpl,coord,ftpl,fntpl] = formCoord2D(nelsx,nelsy,lx,ly);                              % background mesh generation
+[nels,nen]      = size(etpl);                                                  % number of element nodes
 [nodes,nD]   = size(coord);                                                 % number of nodes and dimensions
 h            = [lx ly]./[nelsx nelsy];                                      % element lengths in each direction
 
@@ -90,13 +97,26 @@ for node=1:nodes                                                            % lo
   end
 end
 bc = bc(bc(:,1)>0,:);                                                       % remove empty part of bc
-
+%% Element limits for MP-element searching
+eMin = zeros(nels,nD);                                                      % element lower coordinate limit
+eMax = zeros(nels,nD);                                                      % element upper coordainte limit 
+for i = 1:nD
+    ci = coord(:,i);                                                        % nodal coordinates in current i direction
+    c  = ci(etpl);                                                          % reshaped element coordinates in current i direction
+    eMin(:,i) = min(c,[],2);                                                % element lower coordinate limit 
+    eMax(:,i) = max(c,[],2);                                                % element upper coordainte limit 
+end
 %% Mesh data structure generation
 mesh.etpl  = etpl;                                                          % element topology
 mesh.coord = coord;                                                         % nodal coordinates
 mesh.bc    = bc;                                                            % boundary conditions
 mesh.h     = h;                                                             % mesh size
 mesh.size = [lx,ly];
+mesh.ftpl  = ftpl;                                                          % face-element interactions
+mesh.fntpl = fntpl;                                                         % face topology (node numbers)
+mesh.eMin  = eMin;                                                          % element lower coordinate limit 
+mesh.eMax  = eMax;                                                          % element upper coordainte limit 
+mesh.ks    = 1;
 
 %% Material point generation
 ngp    = mp^nD;                                                             % number of material points per element

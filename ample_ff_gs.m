@@ -20,7 +20,7 @@
 %--------------------------------------------------------------------------
 clear;
 addpath('constitutive','functions','plotting','setup','splitting');        
-split_count = 1;
+split_count = 2;
 ghost_type = 0;%0 - no ghost; 1 - surface ghost; 2 - bulk ghost
 crit = 0.5;
 crit_stop = 0.6;
@@ -83,7 +83,8 @@ run postPro;                                                                % pl
 disp(nmp)
 %pool = 1;
 pool = gcp('nocreate');
-if isempty(pool)
+if isempty(pool) == 1
+    disp("Creating new pool");
     pool = parpool("threads");
 end
 %mpData_a = mpData
@@ -97,9 +98,13 @@ try
 for lstp=1:lstps                                                            % loadstep loop
   fprintf(1,'\n%s %4i %s %4i\n','loadstep ',lstp,' of ',lstps);             % text output to screen (loadstep)
   [mesh,mpData] = elemMPinfo(mesh,mpData);                                  % material point - element information
-  Ks   = mesh.ks*ghostPenalty(mesh);                                        % Ghost stabilisation matrix
-  if ~enable_ghost
-    Ks = Ks * 0;
+  if ghost_type == 1
+    Ks   = mesh.ks*ghostPenalty(mesh);                                        % Ghost stabilisation matrix
+  elseif ghost_type == 2
+    Ks   = mesh.ks*bulkghost(mesh);
+  end
+  if ghost_type == 0
+    Ks = mesh.ks * 0;
   end
 
   fext = detExtForce(nodes,nD,g,mpData);                                    % external force calculation (total)
